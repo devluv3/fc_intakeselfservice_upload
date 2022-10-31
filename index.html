@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <script src="https://kit.fontawesome.com/67a6c2dcbf.js" crossorigin="anonymous"></script>
+    <title>Document Upload</title>
+</head>
+
+<body>
+
+
+
+    <aura:component controller="UploadDocumentsController"
+        implements="flexipage:availableForAllPageTypes,lightning:isUrlAddressable" access="global">
+        <aura:attribute name="id" type="String" />
+        <!-- Add an "init" handler to handle the first "v.pageReference" value -->
+        <aura:handler name="init" value="{!this}" action="{!c.onPageReferenceChange}" />
+        <!-- Add a "change" handler to handle all changes to the "v.pageReference" value -->
+        <aura:handler name="change" value="{!v.pageReference}" action="{!c.onPageReferenceChange}" />
+        <lightning:navigation aura:id="navService" />
+        <aura:attribute name="name" type="String" />
+        <aura:attribute name="Username" type="String" />
+        <aura:attribute name="Password" type="String" />
+        <aura:attribute name="showLoginForm" type="Boolean" default="true" />
+        <aura:attribute name="enrollmentRec" type="Object" />
+        <aura:attribute name="filetype" type="List"
+            default="['.png','.jpg','.jpeg','.pdf', '.bmp', '.tiff','.PNG','.JPG','.JPEG','.PDF', '.BMP', '.TIFF']" />
+        <aura:attribute name="contactId" type="String" />
+        <aura:attribute name="fileName" type="String" default="No File Selected.." />
+        <aura:attribute name="fileName1" type="String" default="No File Selected.." />
+        <aura:attribute name="fileName2" type="String" default="No File Selected.." />
+        <aura:attribute name="fileName3" type="String" default="No File Selected.." />
+        <aura:attribute name="enrolmntOwnerEmail" type="String" default="" />
+        <aura:attribute name="showLoadingSpinner" type="boolean" default="false" />
+        <aura:attribute name="showButton1" type="Boolean" default="false" />
+        <aura:attribute name="showButton2" type="Boolean" default="false" />
+        <aura:attribute name="showButton3" type="Boolean" default="false" />
+        <aura:attribute name="showMainButton" type="Boolean" default="true" />
+        <aura:attribute name="showSpinner" type="Boolean" default="false" />
+        <aura:attribute name="redirect" type="Boolean" default="false" />
+        <aura:attribute name="showTY" type="Boolean" default="false" />
+        <aura:attribute name="showID" type="boolean" default="false" />
+        <aura:attribute name="showSS" type="boolean" default="false" />
+        <aura:attribute name="showPhoto" type="boolean" default="false" />
+        <aura:attribute name="showDelete1" type="boolean" default="false" />
+        <aura:attribute name="showDelete2" type="boolean" default="false" />
+        <aura:attribute name="showDelete3" type="boolean" default="false" />
+        <aura:attribute name="documentsList" type="list" default="[]" />
+        <aura:attribute name="documentsTypeList" type="list" default="[]" />
+        <aura:attribute name="docNamemap" type="map" />
+        <aura:attribute name="formType" type="String" default="null" />
+        <aura:attribute name="isLoginError" type="Boolean" default="false" />
+        <aura:attribute name="showCareGiverText" type="Boolean" default="false" />
+        <aura:attribute name="showCareGiverText1" type="Boolean" default="false" />
+        <aura:attribute name="uploadDocList" type="list" default="[]" />
+        <aura:attribute name="contRecTypeName" type="String" default="" />
+        <br />
+        <!--
+        <div class="banner-container">
+            <div class="banner-img-container">
+                <!--"{!$Resource.FreedomCareSR + './DocumentUpload_Images/Logo-Orange.svg'}"
+                <img src='./DocumentUpload_Images/Logo-Orange.svg'/>
+            </div>
+        </div>
+        -->
+        <!-- aura:if isTrue="{!v.showSpinner}">
+        <div class="exampleHolder">
+            <lightning:spinner alternativeText="Loading" size="large" />
+        </div>
+    </aura:if -->
+        <aura:if isTrue="{!v.showSpinner}">
+            <div class="backgroundInverse">
+                <lightning:spinner alternativeText="Loading" variant="inverse" />
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!v.showTY}">
+            <br /><br />
+            <!--
+        <div class="slds-align_absolute-center slds-m-top_small slds-text-heading_large">
+            <span>Thank You for uploading your documents!</span>
+        </div>
+        -->
+            <aura:set attribute="else">
+                <!--
+            <aura:if isTrue="{!v.showLoginForm}">
+                <div class="slds-form-element slds-align_absolute-center slds-m-top_x-large" style="margin-top:100px;">
+                    <div class="slds-col slds-size_9-of-12" style="background-color:white;">
+                        <form>
+                            <div class="slds-align_absolute-center slds-m-top_small slds-text-heading_large">
+                                <span>Please login!</span>
+                            </div>
+                            <div class="slds-form-element slds-align_absolute-center">
+                                <div class="slds-col slds-size_6-of-12" style="background-color:white;">
+                                    <div class="slds-form-element__control">
+                                        <lightning:input label="Care giver Name:" name="username" value="{!v.enrollmentRec.Name}" required="true" access ="readonly" readonly="true"/>
+                                    </div>
+                                    
+                                    <div class="slds-form-element__control">
+                                        <lightning:input label="Date of Birth:" type="date" name="password"  value="{!v.Password}" required="true" placeholder="MM/DD/YYYY" messageWhenBadInput="Your entry does not match the allowed format MM/DD/YYYY."/>
+                                    </div>
+                                    
+                                    <aura:if isTrue="{!v.isLoginError}">
+                                    	<div class="slds-align_absolute-center" style="height:4rem">
+                                            <div class="slds-text-color_error">Date of Birth entered does not match. Please correct and try again.</div>
+                                        </div>
+                                    </aura:if>
+                                    <div class="slds-align_absolute-center" style="height:4rem">
+                                        <lightning:button variant="Brand" label="Login" onclick="{!c.userLogin}"/>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            
+                        </form>
+                    </div>
+                </div>
+            </aura:if>  
+            -->
+                <aura:if isTrue="{! !v.showLoginForm}">
+                    <div class="slds-grid slds-grid_vertical" id="base-content">
+                        <!--
+                        <div class="slds-col">
+                            <div class="welcome">
+                                <h2>Welcome, {!v.enrollmentRec.Name}!</h2>
+                            </div>
+                            <div class="slds-grid slds-grid_vertical slds-align_absolute-center">
+                                use aura:if for show-hide the loading spinner image
+                            <aura:if isTrue="{!v.showLoadingSpinner}">
+                                <div class="slds-text-body_small slds-text-color_error">Uploading... 
+                                    <img src="/auraFW/resources/aura/images/spinner.gif" class="spinner-img" alt="Loading"/>'
+                                </div>
+                            </aura:if>
+                            </div>
+                        </div>
+                        -->
+                        <aura:if isTrue="{!v.contRecTypeName == 'Caregiver'}">
+                            <!-- <h1 class="document-title">{!v.contRecTypeName} Documents</h1> -->
+                            <!--Accordion Dropdown-->
+                            <h1 class="accordion-main-title">Employee Eligibility Documents</h1>
+                            <div id="accordion">
+                                <ul>
+                                    <!--
+                                        <i class="fa fa-circle fa-xs"></i>
+                
+                                        <span id="title-status" class="upload-icon"></span>
+
+                                        <span id="title-status" class="pending-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                            </svg>
+                                        </span>
+
+                                        <span id="title-status" class="success-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                            </svg>
+                                        </span>
+                                    -->
+                                    <li>
+                                        <input type="checkbox" checked>
+                                        <i></i>
+                                        <h2 id="accordion-title">
+                                            I9 Documents
+                                            <span class="badge-upload">
+                                                <p>Requested</p>
+                                                <span class="upload-icon"></span>
+                                            </span>
+                                            <!--
+                                            <span class="badge-resend">
+                                                <p>Requested</p>
+                                                <span class="resend-icon"></span>
+                                            </span>
+
+                                            <span class="badge-pending">
+                                                    <p>Sent</p>
+                                                    <span class="pending-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                        
+                                            <span class="badge-success">
+                                                <p>Approved</p>
+                                                    <span class="success-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                                        </svg>
+                                                    </span>
+                                            </span>
+                                             -->
+                                            <!--Added in Icon Switch Logic Here-->
+                                        </h2>
+                                        <div>
+                                            <p>Along with your I-9 Documents, we also need a picture of you. Employees
+                                                must provide documentation to their employers to show their
+                                                identity and authorization to work. Employees may present one section
+                                                from List A or a
+                                                combination of one selection from List B and one selection from List C.
+                                                Please be sure to upload only
+                                                original documents, no photo copies.</p>
+                                            <!--"{!$Resource.I9_List_Docs}"-->
+                                            <p><a href="https://www.uscis.gov/i-9-central/form-i-9-acceptable-documents"
+                                                    target="_blank">Click here for more information on acceptable I9
+                                                    documents</a></p>
+                                            <img alt="i9-documents" src="./DocumentUpload_Images/I9_List_Docs.jpeg" />
+                                            <div class="tier" id="accordion">
+                                                <ul>
+                                                    <li>
+                                                        <input type="checkbox" checked>
+                                                        <i></i>
+                                                        <h2>List A</h2>
+                                                        <div class="accordion-body">
+                                                            <label>Photo of one of these Documents: </label>
+                                                            <p>
+                                                                <span class="fa fa-circle fa-xs bullet-point"></span>
+                                                                Passport
+                                                            </p>
+                                                            <p>
+                                                                <span class="fa fa-circle fa-xs bullet-point"></span>
+                                                                Permanent Resident Card
+                                                            </p>
+                                                            <p>
+                                                                <span class="fa fa-circle fa-xs bullet-point"></span>
+                                                                Employment Authorization
+                                                            </p>
+                                                            <input class="file-button" type="file" name="filename">
+
+                                                            <!--Salesforce upload button/logic for List A
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                            <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                                <div class="slds-grid slds-grid_align-center">
+                                                                    <div
+                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                        <lightning:input aura:id="uploadFileId"
+                                                                            onchange="{!c.handleFilesChange}" type="file"
+                                                                            name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                            multiple="false" accept="{!v.filetype}" />
+                                                                        <div class="slds-text-align_center">{!doc.fileValue}
+                                                                        </div>
+                                                                    </div>
+                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                        <div
+                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                            <div
+                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                <div class="slds-col">
+                                                                                    <lightning:button name="{!doc.Id}"
+                                                                                        label="Delete" iconName="utility:delete"
+                                                                                        iconPosition="left"
+                                                                                        variant="destructive"
+                                                                                        onclick="{!c.deleteFile}" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </div>
+                                                            </aura:if>
+                                                        </aura:iteration>
+                                                    </div>
+                                                    -->
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="strike">
+                                                <span>OR</span>
+                                            </div>
+                                            <div class="tier" id="accordion">
+                                                <ul>
+                                                    <li>
+                                                        <input type="checkbox" checked>
+                                                        <i></i>
+                                                        <h2>List B & List C</h2>
+                                                        <div class="accordion-body" style="padding: 0;" >
+                                                            <div class= "BC-List" style="display: flex; justify-content: space-around; flex-direction: row; padding: 0 20px;">
+                                                                <div style="padding: 0;" >
+                                                                    <label>List B: </label>
+                                                                    <p><span class="fa fa-circle fa-xs bullet-point"></span>Driver's License</p>
+                                                                    <p><span class="fa fa-circle fa-xs bullet-point"></span>ID card issued by the State</p>
+                                                                    <p><span class="fa fa-circle fa-xs bullet-point"></span>Employment Authorization</p>
+                                                                    <input class="file-button" type="file" name="filename">
+                                                                    <!--Replace buttons with SF Uplaod button-->
+                                                                    <!--Salesforce upload button/logic for list B
+                                                                    <div class="slds-col slds-size_1-of-1">
+                                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                                            <aura:if isTrue="{!doc.docTypeValue == 'List B'}">
+                                                                                <div class="slds-grid slds-grid_align-center">
+                                                                                    <div
+                                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                        <lightning:input aura:id="uploadFileId"
+                                                                                            onchange="{!c.handleFilesChange}"
+                                                                                            type="file" name="{!doc.Id}"
+                                                                                            label="{!doc.docTypeValue}" multiple="false"
+                                                                                            accept="{!v.filetype}" />
+                                                                                        <div class="slds-text-align_center">
+                                                                                            {!doc.fileValue}</div>
+                                                                                    </div>
+                                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                                        <div
+                                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                            <div
+                                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                                <div class="slds-col">
+                                                                                                    <lightning:button name="{!doc.Id}"
+                                                                                                        label="Delete"
+                                                                                                        iconName="utility:delete"
+                                                                                                        iconPosition="left"
+                                                                                                        variant="destructive"
+                                                                                                        onclick="{!c.deleteFile}" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </aura:if>
+                                                                                </div>
+                                                                            </aura:if>
+                                                                        </aura:iteration>
+                                                                    </div>
+                                                                 -->
+                                                                </div>
+                                                                <div style="padding: 0;">
+                                                                    <label>List C: </label>
+                                                                    <p><span
+                                                                            class="fa fa-circle fa-xs bullet-point"></span>Social
+                                                                        Security Card</p>
+                                                                    <p><span
+                                                                            class="fa fa-circle fa-xs bullet-point"></span>US
+                                                                        Certificate of Birth</p>
+                                                                    <p><span
+                                                                            class="fa fa-circle fa-xs bullet-point"></span>Certificate
+                                                                        of Naturalization (Form N-570)</p>
+                                                                    <input class="file-button" type="file"
+                                                                        name="filename">
+                                                                    <!--Replace buttons with SF Uplaod button-->
+                                                                    <!--Salesforce upload button/logic for list C
+                                                                    <div class="slds-col slds-size_1-of-1">
+                                                                            <aura:iteration items="{!v.documentsList}" var="doc">
+                                                                                <aura:if isTrue="{!doc.docTypeValue == 'List C'}">
+                                                                                    <div class="slds-grid slds-grid_align-center">
+                                                                                        <div
+                                                                                            class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                            <lightning:input aura:id="uploadFileId"
+                                                                                                onchange="{!c.handleFilesChange}"
+                                                                                                type="file" name="{!doc.Id}"
+                                                                                                label="{!doc.docTypeValue}" multiple="false"
+                                                                                                accept="{!v.filetype}" />
+                                                                                            <div class="slds-text-align_center">
+                                                                                                {!doc.fileValue}</div>
+                                                                                        </div>
+                                                                                        <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                                            <div
+                                                                                                class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                                <div
+                                                                                                    class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                                    <div class="slds-col">
+                                                                                                        <lightning:button name="{!doc.Id}"
+                                                                                                            label="Delete"
+                                                                                                            iconName="utility:delete"
+                                                                                                            iconPosition="left"
+                                                                                                            variant="destructive"
+                                                                                                            onclick="{!c.deleteFile}" />
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </aura:if>
+                                                                                    </div>
+                                                                                </aura:if>
+                                                                            </aura:iteration>
+                                                                        </div>
+                                                                    -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    <li>
+                                        <input type="checkbox" checked>
+                                        <i></i>
+                                        <h2>Social Security Number
+                                            <span class="badge-upload">
+                                                <p>Requested</p>
+                                                <span class="upload-icon"></span>
+                                            </span>
+                                            <!--
+                                            <span class="badge-pending">
+                                                    <p>Sent</p>
+                                                    <span class="pending-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                        
+                                            <span class="badge-success">
+                                                <p>Approved</p>
+                                                    <span class="success-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                                        </svg>
+                                                    </span>
+                                            </span>
+                                             -->
+                                            <!--Added in Icon Switch Logic Here-->
+                                        </h2>
+                                        <div class="accordion-body">
+                                            <label>Copy of Government form with your SS Number & name: </label>
+                                                <p><span class="fa fa-circle fa-xs bullet-point"></span>Social Security Card</p>
+                                                <p><span class="fa fa-circle fa-xs bullet-point"></span>Pay Stub</p>
+                                                <p><span class="fa fa-circle fa-xs bullet-point"></span>Tax Return</p>
+                                                <p><span class="fa fa-circle fa-xs bullet-point"></span>W2</p>
+                                                <input class="file-button" type="file" name="filename">
+                                            <!--Salesforce upload button/logic
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                            <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                                <div class="slds-grid slds-grid_align-center">
+                                                                    <div
+                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                        <lightning:input aura:id="uploadFileId"
+                                                                            onchange="{!c.handleFilesChange}" type="file"
+                                                                            name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                            multiple="false" accept="{!v.filetype}" />
+                                                                        <div class="slds-text-align_center">{!doc.fileValue}
+                                                                        </div>
+                                                                    </div>
+                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                        <div
+                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                            <div
+                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                <div class="slds-col">
+                                                                                    <lightning:button name="{!doc.Id}"
+                                                                                        label="Delete" iconName="utility:delete"
+                                                                                        iconPosition="left"
+                                                                                        variant="destructive"
+                                                                                        onclick="{!c.deleteFile}" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </div>
+                                                            </aura:if>
+                                                        </aura:iteration>
+                                                    </div>
+                                                    -->
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <input type="checkbox" checked>
+                                        <i></i>
+                                        <h2>Photo of Yourself
+                                            <span class="badge-resend">
+                                                <p>Rejected</p>
+                                                <span class="resend-icon"></span>
+                                            </span>                                            
+                                            <!--
+                                            <span class="badge-upload">
+                                                <p>Requested</p>
+                                                <span class="upload-icon"></span>
+                                            </span>
+
+                                            <span class="badge-pending">
+                                                    <p>Sent</p>
+                                                    <span class="pending-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                                        </svg>
+                                                    </span>
+                                                </span>
+                                        
+                                            <span class="badge-success">
+                                                <p>Approved</p>
+                                                    <span class="success-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                                        </svg>
+                                                    </span>
+                                            </span>
+                                             -->
+                                            <!--Added in Icon Switch Logic Here-->
+                                        </h2>
+                                        <div>
+                                            <!--Replace buttons with SF Uplaod button-->
+                                            <input class="file-button" type="file" name="filename">
+                                            <!--Salesforce upload button/logic
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                            <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                                <div class="slds-grid slds-grid_align-center">
+                                                                    <div
+                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                        <lightning:input aura:id="uploadFileId"
+                                                                            onchange="{!c.handleFilesChange}" type="file"
+                                                                            name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                            multiple="false" accept="{!v.filetype}" />
+                                                                        <div class="slds-text-align_center">{!doc.fileValue}
+                                                                        </div>
+                                                                    </div>
+                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                        <div
+                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                            <div
+                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                <div class="slds-col">
+                                                                                    <lightning:button name="{!doc.Id}"
+                                                                                        label="Delete" iconName="utility:delete"
+                                                                                        iconPosition="left"
+                                                                                        variant="destructive"
+                                                                                        onclick="{!c.deleteFile}" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </div>
+                                                            </aura:if>
+                                                        </aura:iteration>
+                                                    </div>
+                                                    -->
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+
+                            <h1 class="accordion-main-title">Medical Documents</h1>
+                            <!--
+                                        <i class="fa fa-circle fa-xs"></i>
+                
+                                        <span id="title-status" class="upload-icon"></span>
+
+                                        <span id="title-status" class="pending-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                            </svg>
+                                        </span>
+
+                                        <span id="title-status" class="success-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                            </svg>
+                                        </span>
+                                    -->
+                            <div id="accordion">
+                                <ul>
+                                    
+                                    
+                                    <li>
+                                        <input type="checkbox" checked>
+                                        <i></i>
+                                        <h2>Health Assessment
+                                         
+                                            <span class="badge-pending">
+                                                <p>Submitted</p>
+                                                <span class="pending-icon">
+                                                    <svg class="slds-icon" aria-hidden="true">
+                                                        <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                                    </svg>
+                                                </span>
+                                            </span>
+                                    
+
+                                            <!--
+                                            <span class="badge-upload">
+                                                <p>Send</p>
+                                                <span class="upload-icon"></span>
+                                            </span>
+
+                                            
+                                            <span class="badge-success">
+                                                <p>Approved</p>
+                                                    <span class="success-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                                        </svg>
+                                                    </span>
+                                            </span>
+                                             -->
+                                            <!--Added in Icon Switch Logic Here-->
+                                        </h2>
+                                        <div>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                Molestiae debitis iusto voluptatum doloribus rem,
+                                                qui nesciunt labore tempore fugit iste deserunt incidunt
+                                                error provident repudiandae laudantium quo ipsa unde perspiciatis,
+                                                nihil autem distinctio! Deserunt, aspernatur.</p>
+
+                                                <span class="status-text">Uploaded for review</span>
+                                            <!--Replace buttons with SF Uplaod button
+                                            <input class="file-button" type="file" name="filename">-->
+                                            <!--Salesforce upload button/logic
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                            <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                                <div class="slds-grid slds-grid_align-center">
+                                                                    <div
+                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                        <lightning:input aura:id="uploadFileId"
+                                                                            onchange="{!c.handleFilesChange}" type="file"
+                                                                            name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                            multiple="false" accept="{!v.filetype}" />
+                                                                        <div class="slds-text-align_center">{!doc.fileValue}
+                                                                        </div>
+                                                                    </div>
+                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                        <div
+                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                            <div
+                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                <div class="slds-col">
+                                                                                    <lightning:button name="{!doc.Id}"
+                                                                                        label="Delete" iconName="utility:delete"
+                                                                                        iconPosition="left"
+                                                                                        variant="destructive"
+                                                                                        onclick="{!c.deleteFile}" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </div>
+                                                            </aura:if>
+                                                        </aura:iteration>
+                                                    </div>
+                                                    -->
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+
+                            <h1 class="accordion-main-title">Other Documents</h1>
+                            <div id="accordion">
+                                <ul>
+                                    <!--
+                                        <i class="fa fa-circle fa-xs"></i>
+                                        <span id="title-status" class="upload-icon"></span>
+
+                                        <span id="title-status" class="pending-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                            </svg>
+                                        </span>
+
+                                        <span id="title-status" class="success-icon">
+                                            <svg class="slds-icon" aria-hidden="true">
+                                                <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                            </svg>
+                                        </span>
+                                    -->
+                                    
+                                    <li>
+                                        <input type="checkbox" checked>
+                                        <i></i>
+                                        <h2>Additional Documents
+                                            <span class="badge-success">
+                                                <p>Approved</p>
+                                                    <span class="success-icon">
+                                                        <svg class="slds-icon" aria-hidden="true">
+                                                            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+                                                        </svg>
+                                                    </span>
+                                            </span>
+                                            <!--
+                                            <span class="badge-upload">
+                                                <p>Send</p>
+                                                <span class="upload-icon"></span>
+                                            </span>
+                                                
+                                            <span class="badge-pending">
+                                                <p>Sent</p>
+                                                <span class="pending-icon">
+                                                    <svg class="slds-icon" aria-hidden="true">
+                                                        <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+                                                    </svg>
+                                                </span>
+                                            </span>
+                                        
+                                            
+                                             -->
+                                            <!--Added in Icon Switch Logic Here-->
+                                        </h2>
+                                        <div>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                                                Molestiae debitis iusto voluptatum doloribus rem,
+                                                qui nesciunt labore tempore fugit iste deserunt incidunt
+                                                error provident repudiandae laudantium quo ipsa unde perspiciatis,
+                                                nihil autem distinctio! Deserunt, aspernatur.</p>
+
+                                                <span class="status-text">Completed</span>
+                                            <!--Replace buttons with SF Uplaod button
+                                            <input class="file-button" type="file" name="filename">-->
+                                            <!--Salesforce upload button/logic
+                                                            <div class="slds-col slds-size_1-of-1">
+                                                                <aura:iteration items="{!v.documentsList}" var="doc">
+                                                                    <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                                        <div class="slds-grid slds-grid_align-center">
+                                                                            <div
+                                                                                class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                <lightning:input aura:id="uploadFileId"
+                                                                                    onchange="{!c.handleFilesChange}" type="file"
+                                                                                    name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                                    multiple="false" accept="{!v.filetype}" />
+                                                                                <div class="slds-text-align_center">{!doc.fileValue}
+                                                                                </div>
+                                                                            </div>
+                                                                            <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                                <div
+                                                                                    class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                    <div
+                                                                                        class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                        <div class="slds-col">
+                                                                                            <lightning:button name="{!doc.Id}"
+                                                                                                label="Delete" iconName="utility:delete"
+                                                                                                iconPosition="left"
+                                                                                                variant="destructive"
+                                                                                                onclick="{!c.deleteFile}" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </aura:if>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </aura:iteration>
+                                                            </div>
+                                                            -->
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!--------------------->
+
+
+                        </aura:if>
+                        <!--
+                        <div class="slds-col slds-m-horizontal_medium slds-m-top_large">
+                            <div class="slds-grid slds-wrap wrapBoxCls">
+                                <aura:if isTrue="{!v.contRecTypeName == 'Caregiver'}">
+                                    <div class="slds-col slds-size_3-of-12 borderCls">
+                                        <div class="slds-grid slds-wrap wrapBoxCls">
+                                            <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                                                <div class="slds-grid slds-grid_align-center">
+                                                    <div class="slds-col">
+                                                        <b>List A Document</b>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="slds-col slds-size_1-of-1 slds-m-top_large slds-m-horizontal_large">
+                                                <div class="slds-grid slds-grid_align-center">
+                                                    <div class="slds-col">
+                                                        <p>1. US Passport</p>
+                                                        <p class="slds-m-left_medium">
+                                                            <p>If you are not a US Citizen, </p>
+                                                            <p>a Permanent Resident Card </p>
+                                                            <p class="slds-m-left_x-large">OR</p>
+                                                            <p>Employment Authorization </p>
+                                                            <p>may be required.</p>
+                                                        </p>
+                                                        <p>2. Permanent Resident Card</p>
+                                                        <p class="slds-m-left_x-large">OR</p>
+                                                        <p class="slds-m-left_medium">Employment Authorization</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <aura:iteration items="{!v.documentsList}" var="doc">
+                                                    <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div
+                                                                class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                <lightning:input aura:id="uploadFileId"
+                                                                    onchange="{!c.handleFilesChange}" type="file"
+                                                                    name="{!doc.Id}" label="{!doc.docTypeValue}"
+                                                                    multiple="false" accept="{!v.filetype}" />
+                                                                <div class="slds-text-align_center">{!doc.fileValue}
+                                                                </div>
+                                                            </div>
+                                                            <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                <div
+                                                                    class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                    <div
+                                                                        class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                        <div class="slds-col">
+                                                                            <lightning:button name="{!doc.Id}"
+                                                                                label="Delete" iconName="utility:delete"
+                                                                                iconPosition="left"
+                                                                                variant="destructive"
+                                                                                onclick="{!c.deleteFile}" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </aura:if>
+                                                        </div>
+                                                    </aura:if>
+                                                </aura:iteration>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_0.75-of-12 borderCls">
+                                        <div class="slds-grid slds-grid_vertical-align-center">
+                                            <div class="slds-col"><b>OR</b></div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_4-of-12 borderCls">
+                                        <div class="slds-grid slds-wrap">
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="slds-grid slds-wrap">
+                                                    <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div class="slds-col">
+                                                                <b>List B Document</b>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="slds-col slds-size_1-of-1 slds-m-top_large slds-m-horizontal_large">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div class="slds-col">
+                                                                <p>1. Driver's License</p>
+                                                                <p class="slds-m-left_x-large">OR</p>
+                                                                <p>Id card issued by the State</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="slds-grid slds-wrap">
+                                                    <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div class="slds-col">
+                                                                <b>AND</b>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <div class="slds-grid slds-wrap">
+                                                    <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div class="slds-col">
+                                                                <b>List C Document</b>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="slds-col slds-size_1-of-1 slds-m-top_large slds-m-horizontal_large">
+                                                        <div class="slds-grid slds-grid_align-center">
+                                                            <div class="slds-col">
+                                                                <p>1. Social Security Card</p>
+                                                                <p>2. US Certificate of Birth</p>
+                                                                <p>3. Certificate Of Naturalization <br />Form N-570</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_0.75-of-12 borderCls">
+                                        <div class="slds-grid slds-align_absolute-center">
+                                            <b>AND</b>
+                                        </div>
+                                    </div>
+                                </aura:if>
+                                <div aura:id="additionalDocDivId" class="slds-col slds-size_3-of-12 borderCls">
+                                    <div class="slds-grid slds-wrap wrapBoxCls">
+                                        <aura:if isTrue="{!v.contRecTypeName == 'Caregiver'}">
+                                            <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                                                <div class="slds-grid slds-grid_align-center">
+                                                    <div class="slds-col">
+                                                        <b>Additional Documents</b>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- div class="slds-col slds-size_1-of-1 slds-m-top_large slds-m-horizontal_large">
+                                            <div class="slds-grid slds-grid_align-center">
+                                                <div class="slds-col">
+                                                    <p>Proof of Social Security Number </p><p>(Copy of paystub/ Tax Return/ W2) </p><p>OR Copy of Social Security Card</p>
+                                                </div>
+                                            </div>
+                                        </div -->
+                </aura:if>
+                <aura:iteration items="{!v.docNamemap}" var="docType">
+                    <div class="slds-col slds-size_1-of-1 slds-m-top_large">
+                        <div class="slds-grid slds-wrap">
+                            <!-- div class="slds-col slds-size_1-of-1">
+                                                    <div class="slds-grid slds-grid_align-center">
+                                                        <div class="slds-col">
+                                                            <aura:if isTrue="{!docType.Value == 'Caller'}">
+                                                                <b>Caregiver</b>
+                                                                <aura:if isTrue="{!v.documentsList.length > 1}">
+                                                                    <b>Caregiver</b>
+                                                                    
+                                                                </aura:if>
+                                                                <aura:set attribute="else">
+                                                                    <b>{!docType.Value}</b>
+                                                                </aura:set>
+                                                            </aura:if>
+                                                        </div>
+                                                    </div>
+                                                </div -->
+                            <!-- aura:if isTrue="{!and(docType.Value == 'Caller', v.showCareGiverText == true)}">
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <div class="slds-m-horizontal_large">Dear Caregiver, in order to complete your hiring process, we need to collect a couple of required documents to be able to fill out your I-9 Form.This form serves to verify identity and authorization to work in the US. The most common documents are the driver’s license and the ss card, but please refer to thiswebsite for a list of acceptable documents:<a href="https://www.uscis.gov/i-9-central/form-i-9-acceptable-documents" target="_blank">https://www.uscis.gov/i-9-central/form-i-9-acceptable-documents</a>. Along with your I-9 Documents, we also need a picture of you.</div>
+                                                    </div>
+                                                </aura:if 
+                                                    <div class="slds-col slds-size_1-of-1">
+                                                        <aura:iteration items="{!v.documentsList}" var="doc">
+                                                            <aura:if isTrue="{!docType.Key == doc.docRelatedTo}">
+                                                                <aura:if
+                                                                    isTrue="{!and(doc.docTypeValue != 'List A', doc.docTypeValue != 'List B')}">
+                                                                    <aura:if isTrue="{!doc.docTypeValue != 'List C'}">
+                                                                        <aura:if
+                                                                            isTrue="{!doc.docTypeValue == 'Social Security Card'}">
+                                                                            <div
+                                                                                class="slds-grid slds-grid_align-center">
+                                                                                <div
+                                                                                    class="slds-col slds-size_10-of-10 slds-m-horizontal_xx-small slds-m-top_large">
+                                                                                    <p>Proof of Social Security Number
+                                                                                    </p>
+                                                                                    <p>(Copy of paystub/ Tax Return/ W2)
+                                                                                    </p>
+                                                                                    <p>OR Copy of Social Security Card
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="slds-grid slds-grid_align-center">
+                                                                                <div
+                                                                                    class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                    <lightning:input
+                                                                                        aura:id="uploadFileId"
+                                                                                        onchange="{!c.handleFilesChange}"
+                                                                                        type="file" name="{!doc.Id}"
+                                                                                        label="{!doc.docTypeValue}"
+                                                                                        multiple="false"
+                                                                                        accept="{!v.filetype}" />
+                                                                                    <!-- lightning:fileUpload aura:Id="{!doc.Id}" label="{!doc.docType}" onuploadfinished="{!c.handleFilesChange}"/ 
+                                                                                    <div class="slds-text-align_center">
+                                                                                        {!doc.fileValue}</div>
+                                                                                </div>
+                                                                                <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                                    <div
+                                                                                        class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                        <div
+                                                                                            class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                            <div class="slds-col">
+                                                                                                <lightning:button
+                                                                                                    name="{!doc.Id}"
+                                                                                                    label="Delete"
+                                                                                                    iconName="utility:delete"
+                                                                                                    iconPosition="left"
+                                                                                                    variant="destructive"
+                                                                                                    onclick="{!c.deleteFile}" />
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </aura:if>
+                                                                            </div>
+                                                                            <aura:set attribute="else">
+                                                                                <div
+                                                                                    class="slds-grid slds-grid_align-center">
+                                                                                    <div
+                                                                                        class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                        <lightning:input
+                                                                                            aura:id="uploadFileId"
+                                                                                            onchange="{!c.handleFilesChange}"
+                                                                                            type="file" name="{!doc.Id}"
+                                                                                            label="{!doc.docTypeValue}"
+                                                                                            multiple="false"
+                                                                                            accept="{!v.filetype}" />
+                                                                                        <!-- lightning:fileUpload aura:Id="{!doc.Id}" label="{!doc.docType}" onuploadfinished="{!c.handleFilesChange}"/ 
+                                                                                        <div
+                                                                                            class="slds-text-align_center">
+                                                                                            {!doc.fileValue}</div>
+                                                                                    </div>
+                                                                                    <aura:if
+                                                                                        isTrue="{!doc.showDeleteBtn}">
+                                                                                        <div
+                                                                                            class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                            <div
+                                                                                                class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                                <div class="slds-col">
+                                                                                                    <lightning:button
+                                                                                                        name="{!doc.Id}"
+                                                                                                        label="Delete"
+                                                                                                        iconName="utility:delete"
+                                                                                                        iconPosition="left"
+                                                                                                        variant="destructive"
+                                                                                                        onclick="{!c.deleteFile}" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </aura:if>
+                                                                                </div>
+                                                                            </aura:set>
+                                                                        </aura:if>
+                                                                    </aura:if>
+                                                                </aura:if>
+                                                            </aura:if>
+                                                        </aura:iteration>
+                                                        -->
+                            <!-- aura:if isTrue="{!and(docType.Value == 'Caller', v.showCareGiverText)}">
+                                                        <div class="slds-text-align_center">If you are not a US Citizen, a Permanent Resident Card or Employment Authorization may be required</div>
+                                                    </aura:if -->
+                            <!-- aura:iteration items="{!v.documentsList}" var="doc">
+                                                        <aura:if isTrue="{!docType.Key == doc.docRelatedTo}">
+                                                            <aura:if isTrue="{!or(doc.docTypeValue == 'Permanent Resident Card', doc.docTypeValue == 'Employment Authorization')}">
+                                                                <div class="slds-grid slds-grid_align-center">
+                                                                    <div class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                        <lightning:input aura:id="uploadFileId" onchange="{!c.handleFilesChange}" type="file" name="{!doc.Id}" label="{!doc.docTypeValue}" multiple="false" accept="{!v.filetype}"/>
+                                                                        <lightning:fileUpload aura:Id="{!doc.Id}" label="{!doc.docType}" onuploadfinished="{!c.handleFilesChange}"/>
+                                                                        <div class="slds-text-align_center">{!doc.fileValue}</div>
+                                                                    </div>
+                                                                    <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                        <div class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                <div class="slds-col">
+                                                                                    <lightning:button name="{!doc.Id}" label="Delete" iconName="utility:delete" iconPosition="left"  variant="destructive" onclick="{!c.deleteFile}"/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </div>
+                                                                <aura:set attribute="else"> 
+                                                                    <aura:if isTrue="{!doc.docTypeValue == 'Other Documents'}">
+                                                                        <div class="slds-grid slds-grid_align-center">
+                                                                            <div class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                                                                                <lightning:input aura:id="uploadFileId" onchange="{!c.handleFilesChange}" type="file" name="{!doc.Id}" label="{!doc.docTypeValue}" multiple="false" accept="{!v.filetype}"/>
+                                                                                <lightning:fileUpload aura:Id="{!doc.Id}" label="{!doc.docType}" onuploadfinished="{!c.handleFilesChange}"/>
+                                                                                <div class="slds-text-align_center">{!doc.fileValue}</div>
+                                                                            </div>
+                                                                            <aura:if isTrue="{!doc.showDeleteBtn}">
+                                                                                <div class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                                                                                    <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                                                                                        <div class="slds-col">
+                                                                                            <lightning:button name="{!doc.Id}" label="Delete" iconName="utility:delete" iconPosition="left"  variant="destructive" onclick="{!c.deleteFile}"/>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </aura:if>
+                                                                        </div>
+                                                                    </aura:if>
+                                                                </aura:set>
+                                                            </aura:if>
+                                                        </aura:if>
+                                                    </aura:iteration
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    -->
+                        </div>
+
+
+                        <!-- aura:if isTrue="{!v.showID}">
+                    <div>
+                        <br/><br/>
+                        <div class="slds-grid slds-grid_vertical slds-align_absolute-center">
+                            <div class="slds-col">
+                                
+                                
+                                <lightning:input aura:id="fileId" onchange="{!c.handleFilesChange}" type="file" name="file" label="Upload Identification" multiple="false"/>
+                                <br/>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-text-body_small slds-text-color_error">{!v.fileName1} </div>                        
+                                <br/>
+                            </div>
+                            <aura:if isTrue="{!v.showDelete1}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.delete1}">Delete Document</button>
+                                    <br/><br/>
+                                </div>
+                            </aura:if>
+                            <aura:if isTrue="{!v.showButton1}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.doSave}">Click here to Upload Identification Document</button>
+                                    <br/><br/>
+                                </div>
+                            </aura:if> 
+                            
+                        </div>
+                        
+                    </div> 
+                </aura:if>
+                <aura:if isTrue="{!v.showSS}">
+                    <div>
+                        <br/><br/>
+                        <div class="slds-grid slds-grid_vertical slds-align_absolute-center">
+                            <div class="slds-col">
+                                
+                                <lightning:input aura:id="fileId2" onchange="{!c.handleFilesChange2}" type="file" name="file" label="Upload Social Security Card" multiple="false"/>
+                                <br/>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-text-body_small slds-text-color_error">{!v.fileName2} </div>                        
+                                <br/>
+                            </div>
+                            <aura:if isTrue="{!v.showDelete2}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.delete2}">Delete Document</button>
+                                    <br/><br/>
+                                </div>
+                            </aura:if>
+                            <aura:if isTrue="{!v.showButton2}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.doSave2}">Click here to Upload Social Security Card</button>
+                                    <br/><br/>
+                                </div>
+                                
+                            </aura:if>
+                        </div>
+                        
+                    </div>               
+                </aura:if>
+                <aura:if isTrue="{!v.showPhoto}">
+                    <div>
+                        <br/><br/>
+                        <div class="slds-grid slds-grid_vertical slds-align_absolute-center">
+                            <div class="slds-col">
+                                
+                                <lightning:input aura:id="fileId3" onchange="{!c.handleFilesChange3}" type="file" name="file" label="Upload Photo" multiple="false"/>
+                                <br/>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-text-body_small slds-text-color_error">{!v.fileName3} </div>                        
+                                <br/>
+                            </div>
+                            <aura:if isTrue="{!v.showDelete3}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.delete3}">Delete Document</button>
+                                    <br/><br/>
+                                </div>
+                            </aura:if>
+                            <aura:if isTrue="{!v.showButton3}">
+                                <div class="slds-col">
+                                    <button class="slds-button slds-button_brand" onclick="{!c.doSave3}">Click here to Upload Photo</button>
+                                    <br/><br/>
+                                </div>
+                            </aura:if>
+                       
+                        
+                    </div> 
+                    </div>
+                </aura:if -->
+
+
+                        <div id="button-container">
+                            <div id="center-container" class="slds-grid slds-grid_vertical slds-align_absolute-center">
+                                <aura:if isTrue="{!v.showMainButton}">
+                                    <div class="slds-col">
+                                        <button id="submit-button" onclick="{!c.doSaveMain}">Submit</button>
+                                    </div>
+                                </aura:if>
+                            </div>
+                        </div>
+
+
+        </aura:if>
+        </aura:set>
+        </aura:if>
+    </aura:component>
+    <!--Sudo Code for future implementation
+    <script>
+        const queryString  = window.location
+        console.log(queryString)
+        // if the URL is for example 
+        // https:// ligtening.salesforce.com?step='i9'
+        //we parse 
+        const urlParams = new URLSearchParams(queryString)
+        //then use the param that we need
+        const param = urlParams.get('step')
+        let listItems = document.querySelectorAll('li')
+        listItems.forEach(item => console.log(item.id))
+        // listItems.forEach(item => {
+        //     if(item.id !== param)
+        //     return item = item.style.display = 'none'
+        // })
+        listItems.forEach(item => {
+            if(item.id !== 'i9')
+            return item = item.style.display = 'none'
+        })
+    </script>
+    -->
+</body>
+
+</html>

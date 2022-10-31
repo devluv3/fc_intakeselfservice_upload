@@ -1,0 +1,102 @@
+NOTES FOR JAYASHREE
+
+You will have to change between status icons in the Accordion Tabs 
+
+Accordion Hierarchy 
+
+ACCORDION TITLE 
+    |
+    ACCORDION
+    |
+    ACCORDION TAB(S) (Each tab will have the corresponding items inside)
+        |
+        STATUS 
+        ACCODRION TITLE
+            |
+            ACCODRION BODY
+
+Inside the Accordion body I left the default HTML tags as a place holder but 
+there are some Salesforce buttons you'll uncomment out that'll replace those placeholders 
+
+In Health Assesments Accordion and in Other Documents there are two status's texts that 
+also need to be flipped back and forth depending on if the user submitted the their 
+documents or if it was approved. 
+
+You can copy and paste those status text's to flip between in place of the buttons for the other accordions 
+
+
+STATUS BADGES 
+
+REQUESTED
+<span class="badge-upload">
+    <p>Requested</p>
+    <span class="upload-icon"></span>
+</span>
+
+REJECTED
+<span class="badge-resend">
+    <p>Rejected</p>
+    <span class="resend-icon"></span>
+</span>                                            
+
+SUBMITTED
+<span class="badge-pending">
+    <p>Sent</p>
+    <span class="pending-icon">
+        <svg class="slds-icon" aria-hidden="true">
+            <use xlink:href="./Icons/utility-sprite/svg/symbols.svg#threedots"></use>
+        </svg>
+    </span>
+</span>
+
+APPROVED                               
+<span class="badge-success">
+    <p>Approved</p>
+    <span class="success-icon">
+        <svg class="slds-icon" aria-hidden="true">
+            <use xlink:href="./Icons/action-sprite/svg/symbols.svg#approval"></use>
+        </svg>
+    </span>
+</span>
+
+BUTTON/STATUS TO REPLACE BUTTON
+
+This button was specifically used for List A, all you need to keep is the divs and class names for styling. 
+ALter the logic to this however you need  
+
+<div class="slds-col slds-size_1-of-1">
+    <aura:iteration items="{!v.documentsList}" var="doc">
+        <aura:if isTrue="{!doc.docTypeValue == 'List A'}">
+            <div class="slds-grid slds-grid_align-center">
+                <div
+                    class="slds-col slds-size_8-of-10 slds-m-horizontal_xx-small">
+                        <lightning:input aura:id="uploadFileId"
+                            onchange="{!c.handleFilesChange}" type="file"
+                            name="{!doc.Id}" label="{!doc.docTypeValue}"
+                            multiple="false" accept="{!v.filetype}" />
+                         <div class="slds-text-align_center">{!doc.fileValue}</div>
+                </div>
+                <aura:if isTrue="{!doc.showDeleteBtn}">
+                <div class="slds-col slds-size_2-of-10 slds-m-horizontal_xx-small slds-m-vertical_large">
+                    <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                        <div class="slds-col">
+                            <lightning:button name="{!doc.Id}"
+                                label="Delete" iconName="utility:delete"
+                                iconPosition="left"
+                                variant="destructive"
+                                onclick="{!c.deleteFile}" />
+                        </div>
+                    </div>
+                </div>
+                </aura:if>
+            </div>
+        </aura:if>
+    </aura:iteration>
+</div>
+
+PENDING 
+<span class="status-text">Uploaded for review</span>
+
+APPROVED
+<span class="status-text">Completed</span>
+
